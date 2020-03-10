@@ -56,9 +56,10 @@ function SessionHandler(db) {
         var password = req.body.password;
 
         userDAO.validateLogin(userName, password, function(err, user) {
-            |             var errorMessage = "Invalid username and/or password";
-            var invalidUserNameErrorMessage = "Invalid login credentials";
-            var invalidPasswordErrorMessage = "Invalid login credentials";
+            console.log(user)
+            var errorMessage = "Invalid username and/or password";
+            var invalidUserNameErrorMessage = "Invalid credentials";
+            var invalidPasswordErrorMessage = "Invalid credentials";
             if (err) {
                 if (err.noSuchUser) {
                     console.log('Error: attempt to login with invalid user: ', userName);
@@ -66,14 +67,14 @@ function SessionHandler(db) {
                     // Fix for A1 - 3 Log Injection - encode/sanitize input for CRLF Injection
                     // that could result in log forging:
                     // - Step 1: Require a module that supports encoding
-                    // var ESAPI = require('node-esapi');
+                    var ESAPI = require('node-esapi');
                     // - Step 2: Encode the user input that will be logged in the correct context
                     // following are a few examples:
-                    // console.log('Error: attempt to login with invalid user: %s', ESAPI.encoder().encodeForHTML(userName));
-                    // console.log('Error: attempt to login with invalid user: %s', ESAPI.encoder().encodeForJavaScript(userName));
-                    // console.log('Error: attempt to login with invalid user: %s', ESAPI.encoder().encodeForURL(userName));
+                    console.log('Error: attempt to login with invalid user: %s', ESAPI.encoder().encodeForHTML(userName));
+                    console.log('Error: attempt to login with invalid user: %s', ESAPI.encoder().encodeForJavaScript(userName));
+                    console.log('Error: attempt to login with invalid user: %s', ESAPI.encoder().encodeForURL(userName));
                     // or if you know that this is a CRLF vulnerability you can target this specifically as follows:
-                    // console.log('Error: attempt to login with invalid user: %s', userName.replace(/(\r\n|\r|\n)/g, '_'));
+                    console.log('Error: attempt to login with invalid user: %s', userName.replace(/(\r\n|\r|\n)/g, '_'));
 
                     return res.render("login", {
                         userName: userName,
@@ -107,13 +108,14 @@ function SessionHandler(db) {
             // Fix the problem by regenerating a session in each login
             // by wrapping the below code as a function callback for the method req.session.regenerate()
             // i.e:
-            // `req.session.regenerate(function() {})`
+            req.session.regenerate(function() {
             req.session.userId = user._id;
             if (user.isAdmin) {
               return res.redirect("/benefits");
             } else {
               return res.redirect("/dashboard");
             }
+            })
         });
     };
 
@@ -142,11 +144,11 @@ function SessionHandler(db) {
         var LNAME_RE = /^.{1,100}$/;
         var EMAIL_RE = /^[\S]+@[\S]+\.[\S]+$/;
         var PASS_RE = /^.{1,20}$/;
-        /*
+
         //Fix for A2-2 - Broken Authentication -  requires stronger password
         //(at least 8 characters with numbers and both lowercase and uppercase letters.)
         var PASS_RE =/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
-        */
+
 
         errors.userNameError = "";
         errors.firstNameError = "";
@@ -218,7 +220,7 @@ function SessionHandler(db) {
 
                     //prepare data for the user
                     prepareUserData(user, next);
-                    /*
+
                     sessionDAO.startSession(user._id, function(err, sessionId) {
 
                         if (err) return next(err);
@@ -227,7 +229,7 @@ function SessionHandler(db) {
                         req.session.userId = user._id;
                         return res.render("dashboard", user);
                     });
-                    */
+
                     req.session.regenerate(function() {
                         req.session.userId = user._id;
                         // Set userId property. Required for left nav menu links
