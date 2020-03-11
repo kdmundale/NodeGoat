@@ -64,12 +64,11 @@ function UserDAO(db) {
         console.log(userName, password)
         // Helper function to compare passwords
         function comparePassword(fromDB, fromUser) {
-            return fromDB === fromUser;
 
             // Fix for A2-Broken Auth
             // compares decrypted password stored in this.addUser()
             return bcrypt.compareSync(fromDB, fromUser);
-            
+
         }
 
         // Callback to pass to MongoDB that validates a user document
