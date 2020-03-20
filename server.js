@@ -77,13 +77,15 @@ MongoClient.connect(config.db, function(err, db) {
 
     // Enable session management using express middleware
     app.use(session({
-        genid: function(req) {
-            return genuuid() // use UUIDs for session IDs
-        },
+      //  genid: function(req) {
+      //      return genuuid() // use UUIDs for session IDs
+      //  },
+
         secret: config.cookieSecret,
         // Both mandatory in Express v4
         saveUninitialized: true,
         resave: true,
+
 
         // Fix for A5 - Security MisConfig
         // Use generic cookie name
@@ -122,12 +124,12 @@ MongoClient.connect(config.db, function(err, db) {
 
     // Initializing marked library
     // Fix for A9 - Insecure Dependencies
-    /*
+
     marked.setOptions({
         sanitize: true
     });
     app.locals.marked = marked;
-    */
+
 
     // Application routes
     routes(app, db);
